@@ -9,6 +9,7 @@ import java.awt.CardLayout;
 import javax.swing.JTextArea;
 
 import the.bytecode.club.bytecodeviewer.BytecodeViewer;
+import the.bytecode.club.bytecodeviewer.Resources;
 
 import java.awt.Color;
 import java.io.PrintWriter;
@@ -22,6 +23,8 @@ import java.io.StringWriter;
  */
 
 public class ExceptionUI extends JFrame {
+
+	private static final long serialVersionUID = -5230501978224926296L;
 
 	/**
 	 * @param e
@@ -61,7 +64,7 @@ public class ExceptionUI extends JFrame {
 
 	private void setup(Exception e, String author) {
 
-		this.setIconImages(BytecodeViewer.iconList);
+		this.setIconImages(Resources.iconList);
 		setSize(new Dimension(600, 400));
 		setTitle("Bytecode Viewer " + BytecodeViewer.version
 				+ " - Stack Trace - Send this to " + author);
@@ -82,7 +85,7 @@ public class ExceptionUI extends JFrame {
 	}
 	
 	private void setup(String e, String author) {
-		this.setIconImages(BytecodeViewer.iconList);
+		this.setIconImages(Resources.iconList);
 		setSize(new Dimension(600, 400));
 		setTitle("Bytecode Viewer " + BytecodeViewer.version
 				+ " - Stack Trace - Send this to " + author);
@@ -97,7 +100,5 @@ public class ExceptionUI extends JFrame {
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
-
-	private static final long serialVersionUID = -5230501978224926296L;
 
 }

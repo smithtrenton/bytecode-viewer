@@ -17,18 +17,29 @@ import the.bytecode.club.bytecodeviewer.JarUtils;
 import the.bytecode.club.bytecodeviewer.MiscUtils;
 
 /**
- * A complete FernFlower launcher with all the options (except 2)
+ * A FernFlower wrapper with all the options (except 2)
  * 
  * @author Konloch
  * @author WaterWolf
  * 
  */
 
-public class FernFlowerDecompiler extends JavaDecompiler {
+public class FernFlowerDecompiler extends Decompiler {
 
 	@Override
 	public void decompileToClass(String className, String classNameSaved) {
-		String contents = decompileClassNode(BytecodeViewer.getClassNode(className));
+		ClassNode cn = BytecodeViewer.getClassNode(className);
+		final ClassWriter cw = new ClassWriter(0);
+		try {
+			cn.accept(cw);
+		} catch(Exception e) {
+			e.printStackTrace();
+			try {
+				Thread.sleep(200);
+				cn.accept(cw);
+			} catch (InterruptedException e1) { }
+		}
+		String contents = decompileClassNode(cn, cw.toByteArray());
 		DiskWriter.replaceFile(classNameSaved, contents, false);
 	}
 
@@ -60,10 +71,7 @@ public class FernFlowerDecompiler extends JavaDecompiler {
 	}
 
 	@Override
-	public String decompileClassNode(final ClassNode cn) {
-		final ClassWriter cw = new ClassWriter(0);
-		cn.accept(cw);
-		
+	public String decompileClassNode(final ClassNode cn, byte[] b) {
 		String start = MiscUtils.getUniqueName("", ".class");
 		
 		final File tempClass = new File(start + ".class");
@@ -72,7 +80,7 @@ public class FernFlowerDecompiler extends JavaDecompiler {
 		try {
 			final FileOutputStream fos = new FileOutputStream(tempClass);
 
-			fos.write(cw.toByteArray());
+			fos.write(b);
 
 			fos.close();
 		} catch (final IOException e) {

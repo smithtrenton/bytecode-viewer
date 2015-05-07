@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -135,17 +137,19 @@ public class SearchingPane extends VisibleComponent {
 						t = new BackgroundSearchThread() {
 							@Override
 							public void doSearch() {
-								for (ClassNode cln : BytecodeViewer
-										.getLoadedClasses())
-									searchType.details.search(cln, srn,
-											exact.isSelected());
 
-								MainViewerGUI.getComponent(SearchingPane.class).search
-										.setEnabled(true);
-								MainViewerGUI.getComponent(SearchingPane.class).search
-										.setText("Search");
-								tree.expandPath(new TreePath(tree.getModel()
-										.getRoot()));
+								try {
+									Pattern.compile(RegexInsnFinder.processRegex(RegexSearch.searchText.getText()), Pattern.MULTILINE);
+								} catch (PatternSyntaxException ex) {
+									BytecodeViewer.showMessage("You have an error in your regex syntax.");
+								}
+								
+								for (ClassNode cln : BytecodeViewer.getLoadedClasses())
+									searchType.details.search(cln, srn, exact.isSelected());
+
+								MainViewerGUI.getComponent(SearchingPane.class).search.setEnabled(true);
+								MainViewerGUI.getComponent(SearchingPane.class).search.setText("Search");
+								tree.expandPath(new TreePath(tree.getModel().getRoot()));
 								tree.updateUI();
 							}
 
@@ -160,8 +164,7 @@ public class SearchingPane extends VisibleComponent {
 								.showMessage("You currently have a search performing in the background, please wait for that to finish.");
 					}
 				} else if (radius == SearchRadius.Current_Class) {
-					final ClassViewer cv = MainViewerGUI.getComponent(
-							WorkPane.class).getCurrentClass();
+					final Viewer cv = MainViewerGUI.getComponent(WorkPane.class).getCurrentViewer();
 					if (cv != null) {
 						searchType.details.search(cv.cn, srn,
 								exact.isSelected());
@@ -217,6 +220,12 @@ public class SearchingPane extends VisibleComponent {
 	public void resetWorkspace() {
 		treeRoot.removeAllChildren();
 		tree.updateUI();
+	}
+
+	@Override
+	public void openFile(String name, byte[] contents) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

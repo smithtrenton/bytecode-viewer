@@ -16,11 +16,12 @@ import the.bytecode.club.bytecodeviewer.MiscUtils;
  * @author Konloch
  *
  */
-public class KrakatauAssembler {
+public class KrakatauAssembler extends Compiler {
 
-	public static byte[] compile(String contents, String name) {
+	@Override
+	public byte[] compile(String contents, String name) {
 		if(BytecodeViewer.python.equals("")) {
-			BytecodeViewer.showMessage("You need to set your Python 2.7 executable path.");
+			BytecodeViewer.showMessage("You need to set your Python (or PyPy for speed) 2.7 executable path.");
 			BytecodeViewer.viewer.pythonC();
 		}
 
@@ -45,6 +46,7 @@ public class KrakatauAssembler {
 		try {
 			ProcessBuilder pb = new ProcessBuilder(
 					BytecodeViewer.python,
+					"-O", //love you storyyeller <3
 					BytecodeViewer.krakatauWorkingDirectory + BytecodeViewer.fs + "assemble.py",
 					"-out",
 					tempDirectory.getAbsolutePath(),
@@ -52,6 +54,7 @@ public class KrakatauAssembler {
 			);
 
 	        Process process = pb.start();
+	        BytecodeViewer.krakatau.add(process);
 	        
 	        //Read out dir output
 	        InputStream is = process.getInputStream();
@@ -61,7 +64,8 @@ public class KrakatauAssembler {
 	        while ((line = br.readLine()) != null) {
 	            log += BytecodeViewer.nl + line;
 	        }
-
+	        br.close();
+	        
 	        log += BytecodeViewer.nl+BytecodeViewer.nl+"Error:"+BytecodeViewer.nl+BytecodeViewer.nl;
 	        is = process.getErrorStream();
 	        isr = new InputStreamReader(is);
@@ -69,6 +73,7 @@ public class KrakatauAssembler {
 	        while ((line = br.readLine()) != null) {
 	            log += BytecodeViewer.nl + line;
 	        }
+	        br.close();
 	        
 	        int exitValue = process.waitFor();
 	        log += BytecodeViewer.nl+BytecodeViewer.nl+"Exit Value is " + exitValue;

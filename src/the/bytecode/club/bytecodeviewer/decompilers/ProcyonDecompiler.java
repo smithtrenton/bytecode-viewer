@@ -42,17 +42,29 @@ import the.bytecode.club.bytecodeviewer.JarUtils;
 import the.bytecode.club.bytecodeviewer.MiscUtils;
 
 /**
+ * Procyon Java Decompiler Wrapper
  * 
  * @author Konloch
  * @author DeathMarine
  * 
  */
 
-public class ProcyonDecompiler extends JavaDecompiler {
+public class ProcyonDecompiler extends Decompiler {
 
 	@Override
 	public void decompileToClass(String className, String classNameSaved) {
-		String contents = decompileClassNode(BytecodeViewer.getClassNode(className));
+		ClassNode cn = BytecodeViewer.getClassNode(className);
+		final ClassWriter cw = new ClassWriter(0);
+		try {
+			cn.accept(cw);
+		} catch(Exception e) {
+			e.printStackTrace();
+			try {
+				Thread.sleep(200);
+				cn.accept(cw);
+			} catch (InterruptedException e1) { }
+		}
+		String contents = decompileClassNode(cn, cw.toByteArray());
 		DiskWriter.replaceFile(classNameSaved, contents, false);
 	}
 
@@ -91,12 +103,9 @@ public class ProcyonDecompiler extends JavaDecompiler {
 	}
 
 	@Override
-	public String decompileClassNode(ClassNode cn) {
+	public String decompileClassNode(ClassNode cn, byte[] b) {
 		String exception = "";
 		try {
-			final ClassWriter cw = new ClassWriter(0);
-			cn.accept(cw);
-
 			String fileStart = BytecodeViewer.tempDirectory + BytecodeViewer.fs
 					+ "temp";
 
@@ -105,7 +114,7 @@ public class ProcyonDecompiler extends JavaDecompiler {
 			try {
 				final FileOutputStream fos = new FileOutputStream(tempClass);
 
-				fos.write(cw.toByteArray());
+				fos.write(b);
 
 				fos.close();
 			} catch (final IOException e) {
